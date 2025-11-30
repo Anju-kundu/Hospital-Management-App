@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Set Availability - HMS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Set Your Availability</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h5>Add Availability</h5>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="available_date" class="form-label">Date</label>
+                        <input type="date" id="available_date" name="available_date" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="start_time" class="form-label">Start Time</label>
+                        <input type="time" id="start_time" name="start_time" class="form-control" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="end_time" class="form-label">End Time</label>
+                        <input type="time" id="end_time" name="end_time" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-success w-100">Add Availability</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-primary text-white">
+                <h5>Your Availability</h5>
+            </div>
+            {% if availabilities %}
+                <div class="list-group list-group-flush">
+                    {% for avail in availabilities %}
+                        <div class="list-group-item">
+                            <h6 class="mb-1">{{ avail.available_date.strftime('%d-%m-%Y') }}</h6>
+                            <small>{{ avail.start_time.strftime('%H:%M') }} - {{ avail.end_time.strftime('%H:%M') }}</small>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <div class="alert alert-info m-3">No availability set yet.</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

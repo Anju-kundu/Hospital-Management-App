@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+
+{% block title %}Book Appointment - HMS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Book an Appointment</h1>
+
+<div class="row">
+    <div class="col-md-8 offset-md-2">
+        <div class="card">
+            <div class="card-body">
+                <form method="POST">
+                    <div class="mb-3">
+                        <label for="department_id" class="form-label">Select Department/Specialization</label>
+                        <select id="department_id" class="form-select" required onchange="loadDoctors()">
+                            <option value="">-- Select Department --</option>
+                            {% for dept in departments %}
+                                <option value="{{ dept.dep_id }}">{{ dept.dep_name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="doctor_id" class="form-label">Select Doctor</label>
+                        <select id="doctor_id" name="doctor_id" class="form-select" required>
+                            <option value="">-- Select a Department First --</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="appointment_date" class="form-label">Date</label>
+                        <input type="date" id="appointment_date" name="appointment_date" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="appointment_time" class="form-label">Time</label>
+                        <input type="time" id="appointment_time" name="appointment_time" class="form-control" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="reason" class="form-label">Reason for Visit</label>
+                        <textarea id="reason" name="reason" class="form-control" rows="3"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-success btn-lg w-100">Book Appointment</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function loadDoctors() {
+    const deptId = document.getElementById('department_id').value;
+    if (!deptId) {
+        document.getElementById('doctor_id').innerHTML = '<option value="">-- Select a Department First --</option>';
+        return;
+    }
+    fetch(`/patient/doctors-by-department/${deptId}`)
+        .then(response => response.json())
+        .then(data => {
+            let html = '<option value="">-- Select Doctor --</option>';
+            data.forEach(doctor => {
+                html += `<option value="${doctor.id}">${doctor.name} (${doctor.specialization})</option>`;
+            });
+            document.getElementById('doctor_id').innerHTML = html;
+        });
+}
+</script>
+{% endblock %}

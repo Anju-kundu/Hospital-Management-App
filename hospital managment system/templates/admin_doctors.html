@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Doctors - HMS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Manage Doctors</h1>
+
+<!-- Add Doctor Form -->
+<div class="card mb-4">
+    <div class="card-header bg-primary text-white">
+        <h5>Add New Doctor</h5>
+    </div>
+    <div class="card-body">
+        <form method="POST">
+            <input type="hidden" name="action" value="add">
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="full_name" class="form-label">Full Name</label>
+                    <input type="text" id="full_name" name="full_name" class="form-control" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="username" class="form-label">Username</label>
+                    <input type="text" id="username" name="username" class="form-control" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="email" class="form-label">Email</label>
+                    <input type="email" id="email" name="email" class="form-control" required>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-md-4 mb-3">
+                    <label for="specialization" class="form-label">Specialization</label>
+                    <input type="text" id="specialization" name="specialization" class="form-control" required>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="department_id" class="form-label">Department</label>
+                    <select id="department_id" name="department_id" class="form-select" required>
+                        <option value="">Select Department</option>
+                        {% for dept in departments %}
+                            <option value="{{ dept.dep_id }}">{{ dept.dep_name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                <div class="col-md-4 mb-3">
+                    <label for="phone" class="form-label">Phone</label>
+                    <input type="tel" id="phone" name="phone" class="form-control">
+                </div>
+            </div>
+            <button type="submit" class="btn btn-success">Add Doctor</button>
+        </form>
+    </div>
+</div>
+
+<!-- Doctors List -->
+<div class="card">
+    <div class="card-header bg-primary text-white">
+        <h5>Active Doctors ({{ doctors|length }})</h5>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Specialization</th>
+                    <th>Department</th>
+                    <th>Phone</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for doctor in doctors %}
+                    <tr>
+                        <td>{{ doctor.full_name }}</td>
+                        <td>{{ doctor.username }}</td>
+                        <td>{{ doctor.email }}</td>
+                        <td>{{ doctor.specialization or 'N/A' }}</td>
+                        <td>{{ doctor.department.dep_name if doctor.department else 'N/A' }}</td>
+                        <td>{{ doctor.phone or 'N/A' }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#editDoctor{{ doctor.id }}">Edit</button>
+                            <form method="POST" style="display:inline;">
+                                <input type="hidden" name="action" value="delete">
+                                <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this doctor?')">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+
+                    <!-- Edit Modal -->
+                    <div class="modal fade" id="editDoctor{{ doctor.id }}" tabindex="-1">
+                        <div class="modal-dialog">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Edit Doctor</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST">
+                                    <div class="modal-body">
+                                        <input type="hidden" name="action" value="update">
+                                        <input type="hidden" name="doctor_id" value="{{ doctor.id }}">
+                                        <div class="mb-3">
+                                            <label for="full_name_edit{{ doctor.id }}" class="form-label">Full Name</label>
+                                            <input type="text" id="full_name_edit{{ doctor.id }}" name="full_name" class="form-control" value="{{ doctor.full_name }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="email_edit{{ doctor.id }}" class="form-label">Email</label>
+                                            <input type="email" id="email_edit{{ doctor.id }}" name="email" class="form-control" value="{{ doctor.email }}" required>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="specialization_edit{{ doctor.id }}" class="form-label">Specialization</label>
+                                            <input type="text" id="specialization_edit{{ doctor.id }}" name="specialization" class="form-control" value="{{ doctor.specialization or '' }}">
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="department_edit{{ doctor.id }}" class="form-label">Department</label>
+                                            <select id="department_edit{{ doctor.id }}" name="department_id" class="form-select">
+                                                <option value="">Select Department</option>
+                                                {% for dept in departments %}
+                                                    <option value="{{ dept.dep_id }}" {% if doctor.department_id == dept.dep_id %}selected{% endif %}>{{ dept.dep_name }}</option>
+                                                {% endfor %}
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="phone_edit{{ doctor.id }}" class="form-label">Phone</label>
+                                            <input type="tel" id="phone_edit{{ doctor.id }}" name="phone" class="form-control" value="{{ doctor.phone or '' }}">
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save Changes</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

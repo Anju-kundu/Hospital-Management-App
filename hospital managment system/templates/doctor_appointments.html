@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+
+{% block title %}My Appointments - HMS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">My Appointments</h1>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Patient</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Reason</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for apt in appointments %}
+                    <tr>
+                        <td>{{ apt.patient.full_name }}</td>
+                        <td>{{ apt.appointment_date.strftime('%d-%m-%Y') }}</td>
+                        <td>{{ apt.appointment_time.strftime('%H:%M') }}</td>
+                        <td>
+                            <span class="badge {% if apt.status == 'Booked' %}bg-info{% elif apt.status == 'Completed' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ apt.status }}
+                            </span>
+                        </td>
+                        <td>{{ apt.reason or 'N/A' }}</td>
+                        <td>
+                            <button class="btn btn-sm btn-info" data-bs-toggle="modal" data-bs-target="#updateApt{{ apt.id }}">Update</button>
+                            <a href="{{ url_for('doctor_patient_history', patient_id=apt.patient.id) }}" class="btn btn-sm btn-secondary">History</a>
+                        </td>
+                    </tr>
+
+                    <!-- Update Modal -->
+                    <div class="modal fade" id="updateApt{{ apt.id }}" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header">
+                                    <h5 class="modal-title">Update Appointment</h5>
+                                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                </div>
+                                <form method="POST" action="{{ url_for('doctor_update_appointment', appointment_id=apt.id) }}">
+                                    <div class="modal-body">
+                                        <div class="mb-3">
+                                            <label for="status{{ apt.id }}" class="form-label">Status</label>
+                                            <select id="status{{ apt.id }}" name="status" class="form-select">
+                                                <option value="Booked" {% if apt.status == 'Booked' %}selected{% endif %}>Booked</option>
+                                                <option value="Completed" {% if apt.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                                <option value="Cancelled" {% if apt.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                            </select>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="diagnosis{{ apt.id }}" class="form-label">Diagnosis</label>
+                                            <textarea id="diagnosis{{ apt.id }}" name="diagnosis" class="form-control" rows="3"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="prescription{{ apt.id }}" class="form-label">Prescription</label>
+                                            <textarea id="prescription{{ apt.id }}" name="prescription" class="form-control" rows="3"></textarea>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label for="notes{{ apt.id }}" class="form-label">Notes</label>
+                                            <textarea id="notes{{ apt.id }}" name="notes" class="form-control" rows="3"></textarea>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                        <button type="submit" class="btn btn-primary">Save</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

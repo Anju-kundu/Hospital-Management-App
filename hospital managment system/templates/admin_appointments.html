@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Manage Appointments - HMS{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">All Appointments</h1>
+
+<div class="card">
+    <div class="table-responsive">
+        <table class="table table-hover mb-0">
+            <thead class="table-light">
+                <tr>
+                    <th>Patient</th>
+                    <th>Doctor</th>
+                    <th>Date</th>
+                    <th>Time</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for appointment in appointments %}
+                    <tr>
+                        <td>{{ appointment.patient.full_name }}</td>
+                        <td>{{ appointment.doctor.full_name }}</td>
+                        <td>{{ appointment.appointment_date.strftime('%d-%m-%Y') }}</td>
+                        <td>{{ appointment.appointment_time.strftime('%H:%M') }}</td>
+                        <td>
+                            <span class="badge {% if appointment.status == 'Booked' %}bg-info{% elif appointment.status == 'Completed' %}bg-success{% else %}bg-danger{% endif %}">
+                                {{ appointment.status }}
+                            </span>
+                        </td>
+                        <td>
+                            <form method="POST" action="{{ url_for('update_appointment_status', appointment_id=appointment.id) }}" style="display:inline;">
+                                <select name="status" class="form-select form-select-sm" style="width:auto;display:inline-block;">
+                                    <option value="Booked" {% if appointment.status == 'Booked' %}selected{% endif %}>Booked</option>
+                                    <option value="Completed" {% if appointment.status == 'Completed' %}selected{% endif %}>Completed</option>
+                                    <option value="Cancelled" {% if appointment.status == 'Cancelled' %}selected{% endif %}>Cancelled</option>
+                                </select>
+                                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
