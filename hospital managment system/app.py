@@ -6,16 +6,12 @@ from functools import wraps
 import os
 
 app = Flask(__name__)
-
-# ============================================ Configuration ============================================
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///hospital.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.secret_key = "hospital_secret_key_secure_2025"
 
 db = SQLAlchemy(app)
 
-
-# ============================================ Models ============================================
 
 class Department(db.Model):
     __tablename__ = 'departments'
@@ -124,8 +120,6 @@ class Availability(db.Model):
         return f"<Availability {self.doctor.full_name} on {self.available_date}>"
 
 
-# ============================================ Authentication Helper ============================================
-
 def login_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
@@ -178,7 +172,7 @@ def patient_required(f):
     return decorated_function
 
 
-# ============================================ Public Routes ============================================
+
 
 @app.route('/')
 def index():
@@ -228,7 +222,6 @@ def register():
         full_name = request.form.get('full_name')
         phone = request.form.get('phone')
 
-        # Validation
         if not all([username, email, password, confirm_password, full_name]):
             flash('All fields are required.', 'danger')
             return redirect(url_for('register'))
@@ -244,8 +237,6 @@ def register():
         if User.query.filter_by(email=email).first():
             flash('Email already exists.', 'danger')
             return redirect(url_for('register'))
-
-        # Create patient user
         user = User(
             username=username,
             email=email,
@@ -270,7 +261,7 @@ def logout():
     return redirect(url_for('index'))
 
 
-# ============================================ Admin Routes ============================================
+
 
 @app.route('/admin/dashboard')
 @admin_required
@@ -397,7 +388,6 @@ def admin_search():
     return render_template('admin_search.html', results=results, search_type=search_type, search_query=search_query)
 
 
-# ============================================ Doctor Routes ============================================
 
 @app.route('/doctor/dashboard')
 @doctor_required
@@ -449,7 +439,7 @@ def doctor_update_appointment(appointment_id):
 
         appointment.status = new_status
 
-        # Create/update treatment record if appointment is completed
+
         if new_status == 'Completed':
             treatment = Treatment.query.filter_by(appointment_id=appointment_id).first()
             if not treatment:
@@ -475,7 +465,7 @@ def doctor_availability():
         start_time = request.form.get('start_time')
         end_time = request.form.get('end_time')
 
-        # Convert to Python types
+
         date_obj = datetime.strptime(available_date, '%Y-%m-%d').date()
         start_time_obj = datetime.strptime(start_time, '%H:%M').time()
         end_time_obj = datetime.strptime(end_time, '%H:%M').time()
@@ -499,7 +489,7 @@ def doctor_availability():
 def doctor_patient_history(patient_id):
     doctor_id = session['user_id']
 
-    # Verify doctor has treated this patient
+
     appointment = Appointment.query.filter_by(doctor_id=doctor_id, patient_id=patient_id).first()
     if not appointment:
         flash('You do not have access to this patient.', 'danger')
@@ -514,7 +504,7 @@ def doctor_patient_history(patient_id):
     return render_template('doctor_patient_history.html', patient=patient, treatments=treatments)
 
 
-# ============================================ Patient Routes ============================================
+
 
 @app.route('/patient/dashboard')
 @patient_required
@@ -640,7 +630,6 @@ def patient_profile():
     return render_template('patient_profile.html', patient=patient)
 
 
-# ============================================ API Routes (Optional) ============================================
 
 @app.route('/api/appointments', methods=['GET', 'POST'])
 def api_appointments():
@@ -690,8 +679,6 @@ def api_patients():
         'phone': p.phone
     } for p in patients])
 
-
-# ============================================ Error Handlers ============================================
 
 @app.errorhandler(404)
 def page_not_found(e):
